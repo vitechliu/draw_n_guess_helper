@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <title>Hello from Electron renderer!</title>
+    <style>
+      body,
+      html {
+        padding: 0px;
+        margin: 0px;
+        background-color: rgba(255, 255, 255, 0.4);
+      }
+      #title-bar {
+        -webkit-app-region: drag;
+        height: 24px;
+        background-color: darkviolet;
+        padding: none;
+        margin: 0px;
+      }
+
+      #title {
+        position: fixed;
+        top: 0px;
+        left: 6px;
+      }
+
+      #title-bar-btns {
+        -webkit-app-region: no-drag;
+        position: fixed;
+        top: 0px;
+        right: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="title-bar">
+      <div id="title">Test</div>
+      <div id="title-bar-btns">
+        <button id="min-btn">-</button>
+        <button id="max-btn">+</button>
+        <button id="close-btn">x</button>
+      </div>
+    </div>
+    <div
+      id="test"
+      style="
+        height: 200px !important;
+        width: 200px !important;
+        background-color: white !important;
+      "
+    ></div>
+    <h1>Hello from Electron renderer!2</h1>
+    <button id="btn" onclick="clickBtn">1234</button>
+  </body>
+  <script>
+    (function () {
+      const { BrowserWindow } = require("@electron/remote");
+
+      function init() {
+        document
+          .getElementById("min-btn")
+          .addEventListener("click", function (e) {
+            var window = BrowserWindow.getFocusedWindow();
+            window.minimize();
+          });
+
+        document
+          .getElementById("max-btn")
+          .addEventListener("click", function (e) {
+            var window = BrowserWindow.getFocusedWindow();
+            window.maximize();
+          });
+
+        document
+          .getElementById("close-btn")
+          .addEventListener("click", function (e) {
+            var window = BrowserWindow.getFocusedWindow();
+            window.close();
+          });
+      }
+
+      document.onreadystatechange = function () {
+        if (document.readyState == "complete") {
+          init();
+        }
+      };
+    })();
+  </script>
+</html>

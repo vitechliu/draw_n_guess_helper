@@ -1,0 +1,17 @@
+{
+  "name": "draw_guess_helper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^21.2.3"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.0.8"
+  }
+}
