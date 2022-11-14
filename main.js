@@ -11,8 +11,10 @@ const createWindow = () => {
     alwaysOnTop: true,
     webPreferences: {
         nodeIntegration: true,
-        contextIsolation: false
-    }
+        contextIsolation: false,
+        devTools: true,
+    },
+    
   })
 
   win.loadFile('index.html')

@@ -12,6 +12,7 @@
     "electron": "^21.2.3"
   },
   "dependencies": {
-    "@electron/remote": "^2.0.8"
+    "@electron/remote": "^2.0.8",
+    "vanilla-js-wheel-zoom": "^6.18.1"
   }
 }

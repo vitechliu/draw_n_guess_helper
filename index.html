@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <title>Hello from Electron renderer!</title>
+    <title>Draw</title>
     <style>
       body,
       html {
         padding: 0px;
         margin: 0px;
+        width: 100%;
+        height: 100%;
         background-color: rgba(255, 255, 255, 0.4);
       }
       #title-bar {
@@ -31,32 +33,46 @@
         top: 0px;
         right: 6px;
       }
+
+      .main {
+        margin: 3px;
+        border: 1px solid black;
+        width: calc(100% - 6px);
+        height: calc(100% - 30px);
+      }
+      #paste-area {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      #paste-area > img {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
     </style>
   </head>
   <body>
     <div id="title-bar">
-      <div id="title">Test</div>
+      <div id="title">Draw N Guess 小工具</div>
       <div id="title-bar-btns">
         <button id="min-btn">-</button>
         <button id="max-btn">+</button>
         <button id="close-btn">x</button>
       </div>
     </div>
-    <div
-      id="test"
-      style="
-        height: 200px !important;
-        width: 200px !important;
-        background-color: white !important;
-      "
-    ></div>
-    <h1>Hello from Electron renderer!2</h1>
-    <button id="btn" onclick="clickBtn">1234</button>
+    <div class="main">
+      <div id="paste-area"></div>
+    </div>
   </body>
   <script>
     (function () {
       const { BrowserWindow } = require("@electron/remote");
-
+      const WZoom = require('vanilla-js-wheel-zoom')
       function init() {
         document
           .getElementById("min-btn")
@@ -80,9 +96,40 @@
           });
       }
 
+      function initPaste() {
+        document.getElementById("paste-area").addEventListener(
+          "paste",
+          (e) => {
+            var cbd = e.clipboardData;
+            for (var i = 0; i < cbd.items.length; i++) {
+              var item = cbd.items[i];
+              if (item.kind == "file") {
+                var blob = item.getAsFile();
+                if (blob.size === 0) {
+                  return;
+                }
+                var reader = new FileReader();
+                var imgs = new Image();
+                imgs.file = blob;
+                reader.onload = (function (aImg) {
+                  return function (e) {
+                    aImg.src = e.target.result;
+                  };
+                })(imgs);
+                reader.readAsDataURL(blob);
+                document.querySelector("#paste-area").appendChild(imgs);
+
+                WZoom.create('#paste-area')
+              }
+            }
+          },
+          false
+        );
+      }
       document.onreadystatechange = function () {
         if (document.readyState == "complete") {
           init();
+          initPaste();
         }
       };
     })();
