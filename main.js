@@ -7,8 +7,7 @@ const createWindow = () => {
     height: 600,
     transparent: true,
     frame: false,
-    // backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    alwaysOnTop: true,
+    // alwaysOnTop: true,
     webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
