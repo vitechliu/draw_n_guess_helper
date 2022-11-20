@@ -1,18 +1,32 @@
 {
   "name": "draw_guess_helper",
   "version": "1.0.0",
-  "description": "",
+  "description": "Draw N Guess Helper",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Vitech",
+  "license": "MIT",
   "devDependencies": {
-    "electron": "^21.2.3"
+    "electron": "^21.2.3",
+    "electron-builder": "^23.6.0"
   },
   "dependencies": {
     "@electron/remote": "^2.0.8",
+    "custom-electron-titlebar": "^4.1.3",
     "vanilla-js-wheel-zoom": "^6.18.1"
+  },
+  "build": {
+    "appId": "com.vitech.drawguesshelper",
+    "mac": {
+      "category": "your.app.category.type"
+    },
+    "win": {
+      "icon": "icon.png",
+      "target": "portable"
+    }
   }
 }

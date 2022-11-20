@@ -1,144 +1,115 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <title>Draw</title>
-    <style>
-      body,
-      html {
-        padding: 0px;
-        margin: 0px;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255, 255, 255, 0.4);
-      }
-      #title-bar {
-        -webkit-app-region: drag;
-        height: 24px;
-        background-color: darkviolet;
-        padding: none;
-        margin: 0px;
-      }
 
-      #title {
-        position: fixed;
-        top: 0px;
-        left: 6px;
+<head>
+  <meta charset="UTF-8" />
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <title>Draw N Guess Tools by Vitech</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+
+<body>
+  <div class="main">
+    <div id="zoom"></div>
+  </div>
+</body>
+
+<script>
+  var ipc = require('electron').ipcRenderer;
+  (function () {
+    const { BrowserWindow } = require("@electron/remote");
+
+    function initPaste() {
+      var scale = 1,
+        panning = false,
+        pointX = 0,
+        pointY = 0,
+        start = { x: 0, y: 0 },
+        zoom = document.getElementById("zoom");
+      function setTransform() {
+        zoom.style.transform = "translate(" + pointX + "px, " + pointY + "px) scale(" + scale + ")";
       }
-
-      #title-bar-btns {
-        -webkit-app-region: no-drag;
-        position: fixed;
-        top: 0px;
-        right: 6px;
-      }
-
-      .main {
-        margin: 3px;
-        border: 1px solid black;
-        width: calc(100% - 6px);
-        height: calc(100% - 30px);
-      }
-      #paste-area {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-      }
-
-      #paste-area #target {
-        position: relative;
-        display: flex;
-        align-items: center;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="title-bar">
-      <div id="title">Draw N Guess 小工具</div>
-      <div id="title-bar-btns">
-        <button id="min-btn">-</button>
-        <button id="max-btn">+</button>
-        <button id="close-btn">x</button>
-      </div>
-    </div>
-    <div class="main">
-      <div id="paste-area"></div>
-    </div>
-  </body>
-
-  <script>
-    
-    window.wzoom = null; 
-    (function () {
-      const { BrowserWindow } = require("@electron/remote");
-      
-      function init() {
-        document
-          .getElementById("min-btn")
-          .addEventListener("click", function (e) {
-            var window = BrowserWindow.getFocusedWindow();
-            window.minimize();
-          });
-
-        document
-          .getElementById("max-btn")
-          .addEventListener("click", function (e) {
-            var window = BrowserWindow.getFocusedWindow();
-            window.maximize();
-          });
-
-        document
-          .getElementById("close-btn")
-          .addEventListener("click", function (e) {
-            var window = BrowserWindow.getFocusedWindow();
-            window.close();
-          });
-      }
-
-      function initPaste() {
-        document.getElementById("paste-area").addEventListener(
-          "paste",
-          (e) => {
-            var cbd = e.clipboardData;
-            for (var i = 0; i < cbd.items.length; i++) {
-              var item = cbd.items[i];
-              if (item.kind == "file") {
-                var lastTarget = document.querySelector("#target");
-                if (lastTarget !== null) {
-                  lastTarget.remove();
-                }
-                
-                var blob = item.getAsFile();
-                if (blob.size === 0) {
-                  return;
-                }
-                var reader = new FileReader();
-                var imgs = new Image();
-                imgs.id = "target"
-                imgs.file = blob;
-                reader.onload = (function (aImg) {
-                  return function (e) {
-                    aImg.src = e.target.result;
-                  };
-                })(imgs);
-                reader.readAsDataURL(blob);
-                document.querySelector("#paste-area").appendChild(imgs);
-              }
+      document.addEventListener("paste", (e) => {
+        var cbd = e.clipboardData;
+        for (var i = 0; i < cbd.items.length; i++) {
+          var item = cbd.items[i];
+          if (item.kind == "file") {
+            var lastTarget = document.querySelector("#target");
+            if (lastTarget !== null) {
+              lastTarget.remove();
             }
-          },
-          false
-        );
-      }
-      document.onreadystatechange = function () {
-        if (document.readyState == "complete") {
-          init();
-          initPaste();
+
+            var blob = item.getAsFile();
+            if (blob.size === 0) {
+              return;
+            }
+            var reader = new FileReader();
+            var imgs = new Image();
+            imgs.id = "target"
+            imgs.file = blob;
+            reader.onload = (function (aImg) {
+              return function (e) {
+                aImg.src = e.target.result;
+              };
+            })(imgs);
+            reader.readAsDataURL(blob);
+            document.querySelector("#zoom").appendChild(imgs);
+          }
         }
-      };
-    })();
-  </script>
+      },
+        false
+      );
+      zoom.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        start = { x: e.clientX - pointX, y: e.clientY - pointY };
+        panning = true;
+      });
+      zoom.addEventListener("mouseup", (e) => {
+        panning = false;
+      });
+      zoom.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        var xs = (e.clientX - pointX) / scale,
+          ys = (e.clientY - pointY) / scale,
+          delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY);
+        (delta > 0) ? (scale *= 1.2) : (scale /= 1.2);
+        pointX = e.clientX - xs * scale;
+        pointY = e.clientY - ys * scale;
+        setTransform();
+      });
+      zoom.addEventListener("mousemove", (e) => {
+        e.preventDefault();
+        if (!panning) {
+          return;
+        }
+        pointX = (e.clientX - start.x);
+        pointY = (e.clientY - start.y);
+        setTransform();
+      });
+    }
+
+    document.onreadystatechange = function () {
+      if (document.readyState == "complete") {
+        initPaste();
+      }
+    };
+
+    ipc.on('asynchronous-reply', (event, arg) => {
+        let res = JSON.parse(arg)
+        console.log(res)
+        switch (res.type) {
+          case 'changeStatus':
+            let status = res.data
+            if (status === 1) {
+              document.title = '[已锁定]Draw N Guess Tools by Vitech'
+            } else {
+              document.title = 'Draw N Guess Tools by Vitech'
+            }
+            break;
+        }
+    });
+  })();
+</script>
+
 </html>
